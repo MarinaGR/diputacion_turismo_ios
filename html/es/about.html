@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<title>Ávila Guía del Visitante - Excma. Diputación de Ávila</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, maximum-scale=2.0, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+		<meta name="robots" content="NOINDEX,NOFOLLOW,NOARCHIVE,NOODP,NOSNIPPET">
+		
+		<link href="../../styles/estilos_01.css" rel="stylesheet" type="text/css">
+		
+		<script src="../../js/jquery.js"></script>
+		<script src="../../js/jqueryui.js"></script>
+		<script src="../../js/jquery.ui.touch-punch.min.js"></script>
+		<script src="../../resources/langs/langs.js"></script>
+		<script src="../../js/funciones.js"></script>
+		<script src="../../cordova.js"></script>
+		
+		<script>
+		$(document).ready(function() {
+			$("#ov_view_container_01").css("background-color","#F2F2F3");
+			$('#ov_view_container_01').css("min-height",$(window).innerHeight()+"px");
+			
+			$('#ov_curtain_1_1').hide('fade', function() {
+				$("#ov_view_container_01").show();
+			}, 100);
+		});
+		
+		$(window).load(function() {
+			
+		});
+		</script>		
+	</head>
+
+	<body id="ov_body_01" class="ov_body_02" onload="onBodyLoad()">
+	
+		<div id="ov_curtain_1_1" class="ov_curtain_1"> </div>
+		
+		<div id="ov_view_container_01" class="ov_view_container_01">
+
+			<div class="ov_zone_15">
+			
+				<div class="ov_box_18" onclick="window.location.href='../'+getLocalStorage('current_language')+'/main_menu.html'" >
+					<img src="../../styles/images/icons/back.png" alt="back" class="ov_image_15">
+					<div class="ov_text_26">
+					Volver
+					</div>
+				</div>
+		
+				<div class="ov_box_03">	
+					<div id="ov_text_08" class="ov_text_08">
+						ACERCA DE
+					</div>
+					<div id="geoloc_map_text" class="ov_text_09"> </div>
+				</div>
+				<div class="ov_clear_floats_01">&nbsp;</div>
+				
+				<h3><b>Diputación de Ávila © 2015</b></h3>
+				
+				<p>
+					Esta aplicación ha sido desarrollada con el objetivo de difundir y permitir el acceso rápido a toda la información de la provincia de Ávila.
+				</p>
+				
+				<p>
+					Para cualquier sugerencia pueden contactar con el Área de Turismo de la Diputación de Ávila:<br><br>
+					<a href="mailto:turismo@diputacionavila.es" style="font-size: 1.2em;">turismo@diputacionavila.es</a><br><br>
+					<a href="tel:920206226" style="font-size: 1.2em;">920 206 226</a><br><br>
+				</p>
+				
+				<p>
+					<b>Textos y fotografías:</b><br> Aportados por la Diputación de Ávila<br><br>
+					<b>Diseño y desarrollo:</b><br> Grupo Ovnyline Comunicación<br><br>
+					<b>Imágenes de satélite:</b><br> Google Maps<br>
+				</p>
+				
+			</div>
+		</div>
+		
+	</body>
+	
+</html>
