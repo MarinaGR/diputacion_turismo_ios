@@ -25,17 +25,7 @@
 		var voice="es-ES";		
 		var velocidad=1.2;
 		
-		switch(getLocalStorage("current_language"))
-		{
-			default:
-			case "es":  voice="es-ES";
-						break;
-						
-			case "en":  voice="en-US";
-						break;					
-		}
-		
-		function leer_texto(a_leer, posicion) {
+		/*function leer_texto(a_leer, posicion) {
 				
 			var texto_dividido=a_leer[posicion];
 			
@@ -43,6 +33,17 @@
 			{
 				try {
 				
+					ttsPlugin.initTTS(function() {
+					
+						ttsPlugin.setRate(velocidad); 
+						ttsPlugin.setLanguage(voice); 
+						ttsPlugin.speak(texto_dividido); 
+						
+					}, function() {
+					
+					}); 
+
+
 					TTS.speak({
 						text: texto_dividido,
 						locale: voice,
@@ -82,7 +83,7 @@
 			}
 			else
 				return false;
-		}
+		}*/
 		
 		$(document).ready(function() {
 			$("#ov_view_container_01").css("background-color","#F2F2F3");
@@ -106,8 +107,48 @@
 			{
 				velocidad=1.5;
 			}
+						
+			ttsPlugin.initTTS(function() {
+
+				var voice="es-ES";			
+				switch(getLocalStorage("current_language"))
+				{
+					default:
+					case "es":  voice="es-ES";
+								break;
+								
+					case "en":  voice="en-US";
+								break;					
+				}
+				
+				ttsPlugin.setLanguage(voice);
+				ttsPlugin.setRate(velocidad);
+				
+				$("#play_audioguia").on("click",function(e) {	
+				
+					ttsPlugin.speak($('#point_description').text());
 					
-			$("#play_audioguia").on("click",function(e) {	
+					$("#play_audioguia").hide('fade', function() {
+						$("#stop_audioguia").show();
+					});
+					
+				});
+				
+				$("#stop_audioguia").on("click",function(e) {	
+			
+					ttsPlugin.stopSpeaking(); 
+					
+					$("#stop_audioguia").hide('fade', function() {
+						$("#play_audioguia").show();
+					});
+				});
+			
+			}, function(jqXHR, textStatus, errorThrown) {
+				alert("Error: "+textStatus+" "+errorThrown);
+			}); // Init Plugin : failCallBack doesn't work yet
+			
+					
+			/*$("#play_audioguia").on("click",function(e) {	
 				
 				lectura=true;
 				
@@ -164,14 +205,13 @@
 										
 					try {
 					
+						ttsPlugin.stopSpeaking(); // Try to stop speaking
+					
 						TTS.speak({
 								text: "",
 								locale: voice
 							}, function() {
 								//parado con exito
-								/*$("#play_audioguia").hide('fade', function() {
-									$("#stop_audioguia").show();
-								});*/
 								
 							}, function(reason) {
 								$("#play_audioguia").hide('fade', function() {
@@ -192,7 +232,7 @@
 					
 				});
 
-			});
+			});*/
 			
 		});
 
