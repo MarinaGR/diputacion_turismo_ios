@@ -23,7 +23,7 @@
 		var MAX_CARACTERES=3500;
 		var identificador=get_var_url("id"); 
 		var voice="es-ES";		
-		var velocidad=1.2;
+		var velocidad=0.2;
 		
 		/*function leer_texto(a_leer, posicion) {
 				
@@ -101,11 +101,11 @@
 		
 			if (device.platform == 'android' || device.platform == 'Android' || device.platform == 'amazon-fireos' ) 
 			{
-				velocidad=1.1;
+				velocidad=0.3;
 			}
 			else
 			{
-				velocidad=1.5;
+				velocidad=0.4;
 			}
 						
 			ttsPlugin.initTTS(function() {
