@@ -208,7 +208,7 @@ function register_notif()
 		} 
 		else
 		{	
-		    //$("body").append('<br>Registrando ' + device.platform);
+		    $("body").append('<br>Registrando ' + device.platform);
 			
 			pushNotification.register(tokenHandler, errorHandler, 
 				{"badge":"true",
@@ -287,7 +287,7 @@ function config_notifications(check) {
 // Notificacion para iOS
 function onNotificationAPN(e) {
 	
-	//$("body").append(JSON.stringify(e));
+	$("body").append(JSON.stringify(e));
 	 
 	if (e.alert) {
 		
@@ -613,14 +613,14 @@ function tokenHandler (result) {
 	
 	//alert("tokenHandler");
 	
-	//$("body").append('<br>Listo para notificaciones');
+	$("body").append('<br>Listo para notificaciones');
 	
 	registerOnServerIOS(result);
 }
 
 function successHandler (result) {
 	
-	//$("body").append('<br>Exito: '+result);
+	$("body").append('<br>Exito: '+result);
 }
 
 function errorHandler (error) {
