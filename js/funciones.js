@@ -4,7 +4,7 @@ var now = new Date().getTime();
 			
 var senderID="1095234974489";
 var id_notificacion=0;
-var pushNotification;
+//var pushNotification;
 
 var uuid;
 
@@ -255,7 +255,7 @@ function register_notif()
 }
 function unregister_notif()
 {
-	window.plugins.pushNotification.unregister(function() {
+	//window.plugins.pushNotification.unregister(function() {
 			//notificar al usuario con un mensaje
 			window.sessionStorage.clear();
 			
@@ -289,7 +289,7 @@ function unregister_notif()
 				
 			});
 			*/
-	});
+	//});
 }
 function config_notifications(check) {
 	
