@@ -250,7 +250,7 @@ function register_notif()
 	}
 	catch(err) 
 	{ 
-		$("body").append("<br>Error registro: " + err.message); 
+		//$("body").append("<br>Error registro: " + err.message); 
 	} 
 }
 function unregister_notif()
@@ -317,9 +317,17 @@ function config_notifications(check) {
 // Notificacion para iOS
 function onNotificationAPN(e) {
 	
-	$("body").append(JSON.stringify(e));
+	 $("body").append(JSON.stringify(e));
 	 
-	if (e.alert) {
+	// e.message,
+	// e.title,
+	// e.count,
+	// e.sound,
+	// e.image,
+	// e.additionalData
+
+	if (e.alert) 
+	{
 		
 		//$("body").append('<br>Notificaci&oacute;n: ' + e.alert);
 		// alert("Notificacion IOS");
@@ -332,20 +340,20 @@ function onNotificationAPN(e) {
 		{
 			case "noticia":
 			case "evento":   
-						navigator.notification.confirm(e.alert, onConfirm, e.tipo, ['Ver ahora','Omitir'] );						
+						navigator.notification.confirm(e.message, onConfirm, notif.tipo, ['Ver ahora','Omitir'] );						
 						function onConfirm(buttonIndex) {					
 							if(buttonIndex==1)
 							{
 								window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+notif.id;
 							}
 						}
-						
+												
 						break;
 						
 			case "mensaje":
 			default:
 						navigator.notification.alert(
-							e.alert,  		// message
+							e.message,  		// message
 							alertDismissed,   // callback
 							'Nuevo mensaje',   // title
 							'OK'              // buttonName
@@ -643,14 +651,14 @@ function tokenHandler (result) {
 	
 	//alert("tokenHandler");
 	
-	$("body").append('<br>Listo para notificaciones');
+	//$("body").append('<br>Listo para notificaciones');
 	
-	registerOnServerIOS(result);
+	registerOnServerIOS(result.registrationId);
 }
 
 function successHandler (result) {
 	
-	$("body").append('<br>Exito: '+result);
+	//$("body").append('<br>Exito: '+result);
 }
 
 function errorHandler (error) {
