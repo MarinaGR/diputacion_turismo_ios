@@ -217,6 +217,35 @@ function register_notif()
 				"ecb":"onNotificationAPN"}
 			);	
 		}
+		
+		/*
+		pushNotification = PushNotification.init({
+			android: {
+				senderID: senderID
+			},
+			browser: {
+				pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+			},
+			ios: {
+				alert: "true",
+				badge: "true",
+				sound: "true"
+			},
+			windows: {}
+		});
+
+		push.on('registration', function(data) {
+			onNotificationAPN(data);
+		});
+
+		push.on('notification', function(data) {
+			onNotificationAPN(data);
+		});
+
+		push.on('error', function(e) {
+			// e.message
+		});
+		*/
 	}
 	catch(err) 
 	{ 
