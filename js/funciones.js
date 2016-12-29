@@ -220,7 +220,7 @@ function register_notif()
 		}
 		*/		
 		
-		pushNotification = PushNotification.init({
+		var push = PushNotification.init({
 			android: {
 				senderID: senderID
 			},
@@ -382,9 +382,9 @@ function onNotificationAPN(e) {
 		//snd.play();
 	}
 	
-	if (e.badge) {
+	/*if (e.badge) {
 		pushNotification.setApplicationIconBadgeNumber(successHandler, e.badge);
-	}
+	}*/
 }
 // GCM notificacion para Android
 function onNotification(e) {

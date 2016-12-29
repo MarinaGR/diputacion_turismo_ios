@@ -86,9 +86,7 @@
 	<gap:plugin name="de.appplant.cordova.plugin.local-notification" source="npm" version="0.8.4" />
 	
 	<!--<gap:plugin name="cordova-plugin-pushplugin" source="npm" version="2.6.1" /> -->
-	<plugin name="phonegap-plugin-push" source="npm" version="1.9.2" > 
-			<param name="SENDER_ID" value="1095234974489" />
-	</plugin>
+	<gap:plugin name="phonegap-plugin-push" source="npm" version="1.9.2" />
 	
 	<!--text to speech-->
 	<gap:plugin name="cordova-plugin-tts" source="npm" version="0.2.3" />
