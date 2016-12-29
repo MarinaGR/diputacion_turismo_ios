@@ -258,6 +258,7 @@ function register_notif()
 function unregister_notif()
 {
 	//window.plugins.pushNotification.unregister(function() {
+	push.unregister(function() {
 			//notificar al usuario con un mensaje
 			window.sessionStorage.clear();
 			
@@ -319,7 +320,7 @@ function config_notifications(check) {
 // Notificacion para iOS
 function onNotificationAPN(e) {
 	
-	 $("body").append(JSON.stringify(e));
+	//$("body").append(JSON.stringify(e));
 	 
 	// e.message,
 	// e.title,
@@ -335,18 +336,17 @@ function onNotificationAPN(e) {
 		// alert("Notificacion IOS");
 		 
 		  // Alert (requiere plugin org.apache.cordova.dialogs)
-		// navigator.notification.alert(e.alert);
+		// navigator.notification.alert(e.alert);		
 		
-		
-		switch(notif.tipo)
+		switch(e.additionalData.category)
 		{
 			case "noticia":
 			case "evento":   
-						navigator.notification.confirm(e.message, onConfirm, notif.tipo, ['Ver ahora','Omitir'] );						
+						navigator.notification.confirm(e.message, onConfirm, e.additionalData.category, ['Ver ahora','Omitir'] );						
 						function onConfirm(buttonIndex) {					
 							if(buttonIndex==1)
 							{
-								window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+notif.id;
+								window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+e.additionalData.id;
 							}
 						}
 												
@@ -355,10 +355,10 @@ function onNotificationAPN(e) {
 			case "mensaje":
 			default:
 						navigator.notification.alert(
-							e.message,  		// message
-							alertDismissed,   // callback
-							'Nuevo mensaje',   // title
-							'OK'              // buttonName
+							e.message,  				// message
+							alertDismissed,   			// callback
+							e.additionalData.title,  	// title
+							'OK'              			// buttonName
 						);
 						function alertDismissed() {	
 						}
@@ -392,9 +392,14 @@ function onNotificationAPN(e) {
 		//snd.play();
 	}
 	
-	/*if (e.badge) {
-		pushNotification.setApplicationIconBadgeNumber(successHandler, e.badge);
-	}*/
+	if (e.badge) {
+		//pushNotification.setApplicationIconBadgeNumber(successHandler, e.badge);
+		push.setApplicationIconBadgeNumber(function() {
+			console.log('success');
+		}, function() {
+			console.log('error');
+		}, 0);
+	}
 }
 // GCM notificacion para Android
 function onNotification(e) {
