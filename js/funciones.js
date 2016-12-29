@@ -199,7 +199,8 @@ function onDeviceReady()
 function register_notif()
 {
 	try 
-	{ 		
+	{ 	
+		/*
 		pushNotification = window.plugins.pushNotification;
 		
 		if (device.platform == 'android' || device.platform == 'Android' || device.platform == 'amazon-fireos' ) 
@@ -217,8 +218,8 @@ function register_notif()
 				"ecb":"onNotificationAPN"}
 			);	
 		}
+		*/		
 		
-		/*
 		pushNotification = PushNotification.init({
 			android: {
 				senderID: senderID
@@ -235,7 +236,7 @@ function register_notif()
 		});
 
 		push.on('registration', function(data) {
-			onNotificationAPN(data);
+			tokenHandler(data);
 		});
 
 		push.on('notification', function(data) {
@@ -243,9 +244,9 @@ function register_notif()
 		});
 
 		push.on('error', function(e) {
-			// e.message
+			errorHandler(e);
 		});
-		*/
+		
 	}
 	catch(err) 
 	{ 
