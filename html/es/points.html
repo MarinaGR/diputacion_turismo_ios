@@ -19,12 +19,72 @@
 		
 		<script>
 		var tiempo;
-		var lectura=true;
 		var MAX_CARACTERES=3500;
 		var identificador=get_var_url("id"); 
 		var voice="es-ES";		
-		var velocidad=0.4;
+		var velocidad=1.2;
+		
+		lectura=true;
+		
+		switch(getLocalStorage("current_language"))
+		{
+			default:
+			case "es":  voice="es-ES";
+						break;
+						
+			case "en":  voice="en-US";
+						break;					
+		}
+		
+		function leer_texto(a_leer, posicion) {
 				
+			var texto_dividido=a_leer[posicion];
+			
+			if(lectura==true)
+			{
+				try {
+				
+					TTS.speak({
+						text: texto_dividido,
+						locale: voice,
+						rate: velocidad
+					}, function() {
+					
+						if(posicion<a_leer.length)
+						{
+							//lectura=true;
+							leer_texto(a_leer, posicion+1) ;
+						}
+						else
+						{
+							//terminado con exito
+							lectura=false;
+							$("#stop_audioguia").hide('fade', function() {
+								$("#play_audioguia").show();
+							});
+						}
+						
+					}, function(reason) {
+						$("#stop_audioguia").hide('fade', function() {
+							$("#play_audioguia").show();
+
+						});
+					});
+								
+				} catch(e) {
+										
+					$("#stop_audioguia").hide('fade', function() {
+						$("#play_audioguia").show();
+						//$("#play_audioguia").html('<p style="text-align:center">Error Play</p>');
+					});
+					
+				} finally { }
+				
+			}
+			else
+				return false;
+		}
+		
 		$(document).ready(function() {
 			$("#ov_view_container_01").css("background-color","#F2F2F3");
 			$('#ov_view_container_01').css("min-height",$(window).innerHeight()+"px");
@@ -41,54 +101,154 @@
 		
 			if (device.platform == 'android' || device.platform == 'Android' || device.platform == 'amazon-fireos' ) 
 			{
-				velocidad=0.4;
+				velocidad=1.1;
 			}
 			else
 			{
-				velocidad=0.5;
+				velocidad=1.5;
 			}
-						
-			ttsPlugin.initTTS(function() {
+					
+			$("#play_audioguia").on("click",function(e) {	
+				
+				lectura=true;
+				
+				play();				
 
-				var voice="es-ES";			
-				switch(getLocalStorage("current_language"))
-				{
-					default:
-					case "es":  voice="es-ES";
-								break;
-								
-					case "en":  voice="en-US";
-								break;					
-				}
+			});
+			
+			//Cambiar botones cuando termine de hablar
+			
+			$("#stop_audioguia").on("click",function(e) {	
+		
+				stop();
+
+			});
+			
+		});
+		
+		function stop() {
+		
+			lectura=false;	
+			
+			$("#stop_audioguia").hide('fade', function() {
+					
+				$("#play_audioguia").show();			
+							
+				try {
 				
-				ttsPlugin.setLanguage(voice);
-				ttsPlugin.setRate(velocidad);
-				
-				$("#play_audioguia").on("click",function(e) {	
-				
-					ttsPlugin.speak($('#point_description').text());
+					TTS.speak({
+							text: "",
+							locale: voice
+						}, function() {
+							//parado con exito
+							/*$("#play_audioguia").hide('fade', function() {
+								$("#stop_audioguia").show();
+							});*/
+							
+						}, function(reason) {
+							$("#play_audioguia").hide('fade', function() {
+								$("#stop_audioguia").show();
+								//$("#stop_audioguia").html('<p style="text-align:center">Error Play'+reason+'</p>');
+							});
+						});	
+		
+					
+				} catch(e) {
 					
 					$("#play_audioguia").hide('fade', function() {
 						$("#stop_audioguia").show();
+						$("#stop_audioguia").html('<p style="text-align:center">Error Play</p>');
 					});
 					
-				});
+				} finally { }
+								
+			});	
+		}
+		
+		function play() {
+		
+			$("#play_audioguia").hide('fade', function() {
+				$("#stop_audioguia").show();
 				
-				$("#stop_audioguia").on("click",function(e) {	
-			
-					ttsPlugin.stopSpeaking(); 
-					ttsPlugin.speak("");
+				var array_texto_a_leer=new Array()
+				var texto_a_leer=$('#point_description').text();
+				var num_caracteres_texto=$('#point_description').text().length;
+				
+				if(num_caracteres_texto>MAX_CARACTERES)
+				{
+					var inicio_corte=0;
+					var fin_corte=MAX_CARACTERES;
+					for(i=0;i<parseInt(num_caracteres_texto/MAX_CARACTERES)+1;i++)
+					{
+						array_texto_a_leer[i] = $('#point_description').text().substring(inicio_corte, fin_corte);
+						inicio_corte=fin_corte;
+						fin_corte+=MAX_CARACTERES;
+					}
+				}
+				else
+				{
+					array_texto_a_leer[0] = $('#point_description').text();
+				}
+
+				//clearTimeout(tiempo);
+				
+				if(lectura)
+				{
+					leer_texto(array_texto_a_leer, 0, function() {
 					
-					$("#stop_audioguia").hide('fade', function() {
-						$("#play_audioguia").show();
+						//terminado
+						$("#stop_audioguia").hide('fade', function() {
+							$("#play_audioguia").show();
+						})
+					
 					});
-				});
-			
-			}, function(jqXHR, textStatus, errorThrown) {
-				alert("Error: "+textStatus+" "+errorThrown);
-			}); // Init Plugin : failCallBack doesn't work yet
-	
-		});
+				}
+				
+			});	
+		}
+		
+		function onBackKeyDown()
+		{
+			lectura=false;	
+			try {					
+				TTS.speak({
+						text: "",
+						locale: voice
+					}, function() {
+						window.history.back();						
+					}, function(reason) {
+						window.history.back();
+					});						
+			} catch(e) {				
+				 window.history.back();				
+			} finally { }		
+		}
+		function onOutKeyDown()
+		{
+			lectura=false;	
+			try {					
+				TTS.speak({
+						text: "",
+						locale: voice
+					}, function() {
+						navigator.app.exitApp();	
+					}, function(reason) {
+						navigator.app.exitApp();
+					});						
+			} catch(e) {				
+				 navigator.app.exitApp();		
+			} finally { }		
+		}
+		function onPause() {
+			lectura_ant=lectura;
+			stop();
+		}
+		function onResume() {
+			lectura=lectura_ant;
+			$("#stop_audioguia").hide('fade', function() {
+				$("#play_audioguia").show();
+			})
+		}
 
 		</script>			
 		
@@ -102,7 +262,7 @@
 
 			<div id="container_point" class="ov_zone_22">
 				<div class="ov_box_15" id="ov_box_15">
-					<div class="ov_box_16" id="ov_box_16_1" onclick="window.history.back();" >
+					<div class="ov_box_16" id="ov_box_16_1" onclick="onBackKeyDown();" >
 						<img src="../../styles/images/icons/back.png" alt="back" class="ov_image_15"/>
 						<div id="ov_text_26_1" class="ov_text_26">
 						Volver
@@ -154,7 +314,6 @@
 						</div>
 					</div>
 					
-					<!--
 					<div class="ov_box_21" id="play_audioguia">
 						<img src="../../styles/images/icons/info.png" alt="info" class="ov_image_16"/>
 						<div id="ov_text_29_2" class="ov_text_29">
@@ -167,7 +326,6 @@
 						Parar audio
 						</div>
 					</div>
-					-->
 					
 					<div class="ov_box_21" id="ov_box_21_3" onclick="go_to_page('add_point_route',identificador)">
 						<img src="../../styles/images/icons/include_point2.png" alt="like" class="ov_image_16"/>

@@ -42,6 +42,9 @@ var zoom=1.02;
 
 var intentos=0;
 
+var lectura;
+var lectura_ant=lectura;
+
 var default_language='es';
 
 var lang_available=[['es','Castellano'],['en','English']];
@@ -147,7 +150,9 @@ function onDeviceReady()
 
 	document.addEventListener("backbutton", onBackKeyDown, false);
 	document.addEventListener("menubutton", onMenuKeyDown, false);
-	
+	document.addEventListener("pause", onPause, false);
+	document.addEventListener("resume", onResume, false);
+		
 	/* *********************************************************************** */
 	/* Comentar desde INICIO TEST NOTIFICACIONES hasta FIN TEST NOTIFICACIONES */
 	/* para no realizar el registro del dispositivo	al inicio		 		   */
@@ -203,7 +208,7 @@ function register_notif()
 		} 
 		else
 		{	
-			//$("body").append('<br>Registrando ' + device.platform);
+		    //$("body").append('<br>Registrando ' + device.platform);
 			
 			pushNotification.register(tokenHandler, errorHandler, 
 				{"badge":"true",
@@ -277,7 +282,6 @@ function config_notifications(check) {
 					}
 					break;
 	}
-	 
 }
 
 // Notificacion para iOS
@@ -286,14 +290,44 @@ function onNotificationAPN(e) {
 	//$("body").append(JSON.stringify(e));
 	 
 	if (e.alert) {
-		 //$("body").append('<br>Notificaci&oacute;n: ' + e.alert);
+		
+		//$("body").append('<br>Notificaci&oacute;n: ' + e.alert);
 		// alert("Notificacion IOS");
 		 
 		  // Alert (requiere plugin org.apache.cordova.dialogs)
 		// navigator.notification.alert(e.alert);
 		
-
-		navigator.notification.alert(
+		
+		switch(notif.tipo)
+		{
+			case "noticia":
+			case "evento":   
+						navigator.notification.confirm(e.alert, onConfirm, e.tipo, ['Ver ahora','Omitir'] );						
+						function onConfirm(buttonIndex) {					
+							if(buttonIndex==1)
+							{
+								window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+notif.id;
+							}
+						}
+						
+						break;
+						
+			case "mensaje":
+			default:
+						navigator.notification.alert(
+							e.alert,  		// message
+							alertDismissed,   // callback
+							'Nuevo mensaje',   // title
+							'OK'              // buttonName
+						);
+						function alertDismissed() {	
+						}
+		
+						break;
+						
+		}
+		
+		/*navigator.notification.alert(
 			e.alert,  // message
 			alertDismissed,   // callback
 			'Notificación',   // title
@@ -308,7 +342,7 @@ function onNotificationAPN(e) {
 				default:		window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+e.id;
 								break;
 			}
-		}
+		}*/
  		
 	}
 		
@@ -372,7 +406,36 @@ function onNotification(e) {
 
 						id_notificacion++;	*/
 	
-						navigator.notification.confirm(notif.title, onConfirm, notif.tipo, ['Ver ahora','Omitir'] );
+						switch(notif.tipo)
+						{
+							case "noticia":
+							case "evento":   
+										navigator.notification.confirm(notif.title, onConfirm, notif.tipo, ['Ver ahora','Omitir'] );						
+										function onConfirm(buttonIndex) {					
+											if(buttonIndex==1)
+											{
+												window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+notif.id;
+											}
+										}
+										
+										break;
+										
+							case "mensaje":
+							default:
+										navigator.notification.alert(
+											notif.data.mensaje,  		// message
+											alertDismissed,   			// callback
+											notif.title,   // title
+											'OK'              			// buttonName
+										);
+										function alertDismissed() {	
+										}
+						
+										break;
+										
+						}
+		
+						/*navigator.notification.confirm(notif.title, onConfirm, notif.tipo, ['Ver ahora','Omitir'] );
 						
 						function onConfirm(buttonIndex) {
 	
@@ -386,21 +449,43 @@ function onNotification(e) {
 												break;
 								}
 							}
-						}				
+						}*/				
 											
 					}
 					else
 					{	
 						// e.coldstart: Usuario toca notificación en la barra de notificaciones
 						// Coldstart y background: Enviamos a la página requerida
-						
+												
 						switch(notif.tipo)
+						{
+							case "noticia":
+							case "evento":   
+										window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+notif.id;
+										break;
+										
+							case "mensaje":
+							default:	
+										navigator.notification.alert(
+											notif.data.mensaje,  		// message
+											alertDismissed,   			// callback
+											notif.title,   // title
+											'OK'              			// buttonName
+										);
+										function alertDismissed() {	
+										}
+						
+										break;
+										
+						}
+						
+						/*switch(notif.tipo)
 						{
 							case "noticia": 
 							case "evento":   
 							default:		window.location.href="../"+getLocalStorage('current_language')+"/event.html?id="+notif.id;
 											break;
-						}
+						}*/
 						
 					}					
 					break;
@@ -560,6 +645,13 @@ function onOutKeyDown()
 {
 	navigator.app.exitApp();
 	return false;
+}
+function onPause() {
+	lectura_ant=lectura;
+    lectura=false;
+}
+function onResume() {
+    lectura=lectura_ant;
 }
 function onOnline()
 {
@@ -2034,6 +2126,12 @@ function ajax_recover_data(type, folder, values, container, params) {
 		if(data.length==0) {
 			
 			$("#"+container).html("<p>"+TEXTOS[7]+"</p>");
+			return;
+		}
+		
+		if(data.status=="KO") {
+			
+			$("#"+container).html("<p>"+TEXTOS[7]+"</p><p>"+data.errir+"</p>");
 			return;
 		}
 		
@@ -5306,17 +5404,167 @@ function ajax_recover_extern_data(operation, container, params) {
 							
 							cadena+='<div id="ov_zone_15" class="ov_zone_15_b">';
 							
+							/* *****************************************
+							cadena+="<div class='contenedor_flechas'>"+
+								"<a href='lecturas.html?id="+id_instalacion+"&fecha="+fecha_calendario[0]+"-"+addZero(parseInt(fecha_calendario[1])-1)+"-"+addZero(parseInt(fecha_calendario[2]))+"&tipo=mes' style='float:left; width:25px; height:25px; text-align: center;'><img src='./resources/images/general/arrow_left.png' alt='Anterior' width='18' /></a>"+
+								"<a href='lecturas.html?id="+id_instalacion+"&fecha="+fecha_calendario[0]+"-"+addZero(parseInt(fecha_calendario[1])+1)+"-"+addZero(parseInt(fecha_calendario[2]))+"&tipo=mes' style='float:right; width:25px; height:25px; text-align: center;'><img src='./resources/images/general/arrow_right.png' alt='Siguiente' width='18' /></a><div class='clear_01'> </div></div>";
+						
+							cadena+='<div class="clear_01"> </div>';
+							
+							cadena+='<div id="calendario"></div>';
+							
+							cadena+="</div>";
+							
+							if(data.length==0) {
+								cadena+="No hay informaci&oacute;n.";
+							}
+							else
+							{			
+								
+								$.each(data, function(index, result) {  
+								
+									var fecha=result.Fecha;	
+									
+									var fecha_solo=fecha.toString().split("T");
+									var fecha_split=fecha_solo[0].split("-");
+								
+									var dia=parseInt(fecha_split[2]);
+									var mes=parseInt(fecha_split[1]);
+									var anio=parseInt(fecha_split[0]);			
+									
+									var fecha_formateada=addZero(dia)+"-"+addZero(mes)+"-"+anio;
+									
+									array_fechas[index]=addZero(dia);
+									array_lecturas[index]=result.Energia;
+									array_eventos[(dia-1)]=result.CantidadEventos;
+									
+									array_calendario[dia]=result.Energia;
+									
+									total_energia_mes+=parseInt(result.Energia);
+							
+								});
+								
+								var datos = {
+									labels: array_fechas.reverse(), 
+									datasets: [
+										{
+											fillColor: "rgba(129,16,72,0.5)",
+											strokeColor: "rgba(129,16,72,1)",
+											pointColor: "rgba(129,16,72,1)",
+											pointStrokeColor: "#fff",
+											pointHighlightFill: "#fff",
+											pointHighlightStroke: "rgba(129,16,72,1)",
+											data: array_lecturas.reverse()
+										}
+									]
+								};
+							}
+
+							$("#"+container).html(cadena);
+							
+							$("#total_energia_mes").html(total_energia_mes+" kWh");
+							
+							var width_canvas=$(".section_01").width(); 
+							$("#grafica_mensual").attr("width",width_canvas);
+							
+							$.datepicker.regional['es'] = {
+								closeText: 'Cerrar',
+								prevText: '<Ant',
+								nextText: 'Sig>',
+								currentText: 'Hoy',
+								monthNames: monthNames,
+								dayNamesMin: daysNamesMini,
+								weekHeader: 'Sm',
+								isRTL: false,
+								showMonthAfterYear: false,
+								yearSuffix: '',
+								inline: true,
+								firstDay: 1,
+								showOtherMonths: false,
+							};
+							$.datepicker.setDefaults($.datepicker.regional['es']);
+		
+							$('#calendario').datepicker({
+												hideIfNoPrevNext: false,
+												showButtonPanel: false,
+												defaultDate:new Date(fecha_calendario[0], fecha_calendario[1]-1, fecha_calendario[2], 0,0,0,0),
+												//defaultDate:new Date(fecha_calendario[1]+"-"+fecha_calendario[2]+"-"+fecha_calendario[0]),
+												onChangeMonthYear: function(year, month, widget) {
+																//reloadCalendar(month, year);
+															}
+											});		
+										
+							$.datepicker._selectDate = function(id, dateStr) {						
+								//No hacemos nada al seleccionar un día, la acción ya está metida en el div de energía
+								var target = $(id);
+								var inst = this._getInst(target[0]);							
+							}	
+							
+							$(".ui-datepicker-calendar .ui-state-default").each(function () {
+								//Comprueba si es el mes y año seleccionado
+								if($(".ui-datepicker-year").first().html() == fecha_calendario[0] && $(".ui-datepicker-month").first().html() == monthNames[parseInt(fecha_calendario[1])-1])
+								{
+									 //Si existe el día en el array de lecturas 
+									 if(array_fechas[parseInt($(this).html())-1])
+									 {
+										var valor=array_lecturas[parseInt($(this).html())-1];
+										
+										var eventos=array_eventos[parseInt($(this).html())-1];
+
+										 //Añadimos la energía a la celda del día
+										 var clase="";
+										 
+										 var energiaMaxima = potencia_instalacion * 0.006;
+											
+										 if(valor<energiaMaxima*0.33)
+											clase="e_baja";
+										 else if(valor<energiaMaxima*0.66)
+											clase="e_media";
+										 else 
+											clase="e_alta";
+																												 
+										// if(getLocalStorage("premium")==FLAG_PREMIUMPLUS)
+										 if(mantenedores[id_instalacion].premiumplus==true)
+										 {
+											if(eventos>0)
+											{
+												$(this).append("<div class='badge' onclick='window.location.href=\"lecturas.html?id="+valores[1]+"&fecha="+fecha_calendario[0]+"-"+fecha_calendario[1]+"-"+parseInt($(this).html())+"&tipo=dia\"'>"+eventos+"</div>");
+											}
+											
+											$(this).append("<div class='energia_02 "+clase+"' onclick='window.location.href=\"lecturas.html?id="+valores[1]+"&fecha="+fecha_calendario[0]+"-"+fecha_calendario[1]+"-"+parseInt($(this).html())+"&tipo=dia\"'>"+valor+"</div>");
+										 }
+										 //if(getLocalStorage("premium")==FLAG_PREMIUM)
+										 if(mantenedores[id_instalacion].premium==true)
+										 {
+											$(this).append("<div class='energia_02 "+clase+"'>"+valor+"</div>");
+										 }
+									 }
+									 else
+									 {
+										if(eventos>0)
+										{
+											$(this).append("<div class='badge'>!</div>");
+										}
+											
+										$(this).append("<div class='sin_datos_energia'> </div>");
+									 }
+								}
+
+							 });
+						 	
+							***************************************** */
+							
 							$.each(data.result, function(i,d) {
-								cadena+='<div onclick="window.location.href=\'event.html?id='+d.id_evento+'\'" >';
-								cadena+='<div class="ov_box_09_10_a" >'
-											+'<div class="ov_text_14">'
+								cadena+='<div class="eventos_agenda" onclick="window.location.href=\'event.html?id='+d.id_evento+'\'" >';
+								cadena+='<div class="ov_box_20" >'
+											+'<div class="ov_text_19">'
 											+d.titulo+'<br><span style="color:#333">'+d.fecha_ini+''+d.fecha_fin+'</span>'
 											+'</div>'
 										+'</div>';
 										
 								if(d.descripcion!="" && d.descripcion!="&nbsp;")
 								{
-									cadena+='<div class="ov_box_07_08_a">'
+									cadena+='<div class="ov_box_08">'
 												+'<div class="ov_text_15">'
 												+d.descripcion
 												+'</div>'
@@ -5324,85 +5572,7 @@ function ajax_recover_extern_data(operation, container, params) {
 								}
 								cadena+='</div>';
 							});
-							
-							/*cadena+='<div id="ov_scroller_01_guide" class="ov_scroller_01_guide">&nbsp;</div>'
-									+'<div id="ov_scroller_01" class="ov_scroller_01">'
-										+'<img src="../../styles/images/icons/up_arrow.png" alt="up" class="ov_image_10"/>'
-										+'<div class="ov_vertical_space_02">&nbsp;</div>'
-										+'<img src="../../styles/images/icons/down_arrow.png" alt="down" class="ov_image_10"/>'
-									+'</div>';*/
-									
-							/*var indice=0;
-							$.each(data.result, function(i,d) {
-								//onclick="window.open('+d.url+', \'_system\', \'location=yes\');"
-								if(indice%2)
-								{
-									
-									/*cadena+='<div class="ov_box_09" onclick="window.location.href=\'event.html?id='+d.id_evento+'\'" >'
-												+'<div id="ov_text_14_1" class="ov_text_14">'
-												+d.titulo+'<br><span style="color:#C0615F">'+d.fecha_ini+''+d.fecha_fin+'</span>'
-												+'</div>'
-											+'</div>';
-											
-									cadena+='<div class="ov_box_10">'
-												+'<div id="ov_text_15_1" class="ov_text_15">'
-												+d.descripcion
-												+'</div>'
-											+'</div>';*/
-											
-									
-									
-									/*cadena+='<div class="ov_box_09_10_a" onclick="window.location.href=\'event.html?id='+d.id_evento+'\'" >'
-												+'<div class="ov_text_14_a">'
-												+d.titulo+'<br><span style="color:#333">'+d.fecha_ini+''+d.fecha_fin+'</span>'
-												+'</div>'
-											+'</div>';
-											
-									if(d.descripcion!="" && d.descripcion!="&nbsp;")
-									{
-										cadena+='<div class="ov_box_09_10_b">'
-													+'<div class="ov_text_15_a">'
-													+d.descripcion
-													+'</div>'
-												+'</div>';
-									}
-											
-								}
-								else
-								{
-									
-									/*cadena+='<div class="ov_box_07_a" onclick="window.location.href=\'event.html?id='+d.id_evento+'\'" >'
-											+'<div class="ov_text_12">'
-											+d.titulo+'<br><span style="color:#333">'+d.fecha_ini+''+d.fecha_fin+'</span>'
-											+'</div>'
-										+'</div>'
-									cadena+='<div class="ov_box_08_a">'
-											+'<div class="ov_text_13">'
-											+d.descripcion
-											+'</div>'
-										+'</div>';*/
-									
-									
-									/*cadena+='<div class="ov_box_07_08_a" onclick="window.location.href=\'event.html?id='+d.id_evento+'\'" >'
-												+'<div class="ov_text_12_a">'
-												+d.titulo+'<br><span style="color:#333">'+d.fecha_ini+''+d.fecha_fin+'</span>'
-												+'</div>'
-											+'</div>';
-									
-									if(d.descripcion!="" && d.descripcion!="&nbsp;")
-									{									
-										cadena+='<div class="ov_box_07_08_b">'
-													+'<div class="ov_text_13_a">'
-													+d.descripcion
-													+'</div>'
-												+'</div>';
-									}
-									
-								}
-								
-								indice++;
-								
-							});*/
+			
 							cadena+='</div>';
 							
 							$("#"+container).html(cadena);			
@@ -5416,8 +5586,7 @@ function ajax_recover_extern_data(operation, container, params) {
 								var actual_top=ui.position.top;
 								var new_position=-1*parseInt(actual_top/1.5);
 
-								$("#ov_zone_15").css("top",new_position+"px");
-								
+								$("#ov_zone_15").css("top",new_position+"px");								
 							}
 	
 							$( "#ov_scroller_01" ).draggable({ axis: "y", containment: "parent", drag: function(event,ui){ov_manage_scroll_01(event,ui);},revert: false });
@@ -5432,10 +5601,27 @@ function ajax_recover_extern_data(operation, container, params) {
 							//onclick="window.open('+d.url+', \'_system\', \'location=yes\');"
 							cadena+='<div class="" onclick="window.open('+data.url_web+', \'_system\', \'location=yes\');" >'
 										+'<div class="ov_text_08">'
-										+d.titulo+'<br><span class="ov_text_32">'+d.fecha_ini+''+d.fecha_fin+'</span>'
+										+d.titulo+'<br><span class="ov_text_32" style="font-size:0.7em;">'+d.fecha_ini+''+d.fecha_fin+'</span>'
 										+'</div>'
 									+'</div>';
 									
+							cadena+='<div class="clear_02"></div><div class="clear_02"></div>';
+									
+							var titulo_compartir=(d.titulo).replace(/["']/g, "");
+							var lugar_compartir=(d.lugar).replace(/["']/g, "");
+							var texto_compartir="¿Te interesa este evento? "+titulo_compartir+" - (*)Descarga la aplicación ·Diputación de Ávila - Turismo· desde Google Play para Android o desde App Store para iPhone, y mantente informado. http://www.turismoavila.com/app/qr.php"
+																													
+							if(data.url_image!="")
+							{							
+								cadena+='<div id="compartir" onclick="window.plugins.socialsharing.share(\''+texto_compartir+'\', \''+titulo_compartir+'\', \''+data.url_image+'\', null)" >'+
+								'<div style="background:#A8252B" class="ov_zone_25"><div id="ov_text_30" class="ov_text_30"><i class="fa fa-share-alt fa-fw fa-lg"> </i> COMPARTIR ESTE EVENTO</div></div></div>';
+							}
+							else
+							{
+								cadena+='<div class="" id="compartir" onclick="window.plugins.socialsharing.share(\''+texto_compartir+'\', \''+titulo_compartir+'\', \'\', null)" >'+
+								'<div class="ov_zone_25" style="background:#A8252B"><div id="ov_text_30" class="ov_text_30"><i class="fa fa-share-alt fa-fw fa-lg"> </i> COMPARTIR ESTE EVENTO</div></div></div>';
+							}
+						
 							cadena+='<div class="ov_box_22">'
 										+'<div class="ov_text_09">'
 										+d.descripcion
@@ -5443,7 +5629,7 @@ function ajax_recover_extern_data(operation, container, params) {
 									+'</div>';		
 
 							cadena+='<div class="ov_clear_floats_01"> </div>';
-
+							
 							$("#"+container).html(cadena);
 							
 							break;	
