@@ -5,6 +5,7 @@ var now = new Date().getTime();
 var senderID="1095234974489";
 var id_notificacion=0;
 //var pushNotification;
+var push;
 
 var uuid;
 
@@ -173,6 +174,15 @@ function onDeviceReady()
 			}
 		}
 	}
+	
+	push.on('notification', function(data) {
+		onNotificationAPN(data);
+	});
+
+	push.on('error', function(e) {
+		errorHandler(e);
+	});
+	
 	// FIN TEST NOTIFICACIONES	
 	
 	//cordova.plugins.notification.local.on("click", function (notification, state) {
@@ -220,7 +230,7 @@ function register_notif()
 		}
 		*/		
 		
-		var push = PushNotification.init({
+		push = PushNotification.init({
 			android: {
 				senderID: senderID
 			},
@@ -237,14 +247,6 @@ function register_notif()
 
 		push.on('registration', function(data) {
 			tokenHandler(data);
-		});
-
-		push.on('notification', function(data) {
-			onNotificationAPN(data);
-		});
-
-		push.on('error', function(e) {
-			errorHandler(e);
 		});
 		
 	}
@@ -326,7 +328,7 @@ function onNotificationAPN(e) {
 	// e.image,
 	// e.additionalData
 
-	if (e.alert) 
+	if (e.message) 
 	{
 		
 		//$("body").append('<br>Notificaci&oacute;n: ' + e.alert);
