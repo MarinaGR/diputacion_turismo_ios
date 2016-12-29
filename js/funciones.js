@@ -292,7 +292,7 @@ function unregister_notif()
 				
 			});
 			*/
-	//});
+	});
 }
 function config_notifications(check) {
 	
